@@ -1,0 +1,15 @@
+{
+  "resources/index.js": {
+    "dynamicImports": [
+      "resources/pages/Setup.vue"
+    ],
+    "file": "assets/index-d05a4ed3.js",
+    "isEntry": true,
+    "src": "resources/index.js"
+  },
+  "resources/pages/Setup.vue": {
+    "file": "assets/Setup-a1dfaf71.js",
+    "isDynamicEntry": true,
+    "src": "resources/pages/Setup.vue"
+  }
+}

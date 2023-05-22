@@ -1,0 +1,37 @@
+{
+	"name": "adminui/adminui-xero",
+	"description": "AdminUI. Xero plugin to integrate with AdminUI. A private package.",
+	"type": "laravel",
+	"license": "BSD-4-Clause",
+	"authors": [
+		{
+			"name": "Kenny Turner",
+			"email": "k.turner@dsmdesign.co.uk"
+		},
+		{
+			"name": "Craig Riley",
+			"email": "c.riley@dsmdesign.co.uk"
+		}
+	],
+	"require": {
+		"adminui/adminui": "*",
+		"illuminate/support": "5.5.x|5.6.x|5.7.x|5.8.x|6.x|7.x|8.x|9.x|10.x",
+		"league/oauth2-client": "^1.4|^2",
+		"guzzlehttp/guzzle": "6.x|7.x",
+		"ext-json": "*",
+		"ext-fileinfo": "*",
+		"ext-curl": "*"
+	},
+	"autoload": {
+		"psr-4": {
+			"AdminUI\\AdminUIXero\\": "src"
+		}
+	},
+	"extra": {
+		"laravel": {
+			"providers": [
+				"AdminUI\\AdminUIXero\\Provider"
+			]
+		}
+	}
+}
