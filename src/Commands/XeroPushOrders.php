@@ -5,20 +5,28 @@ namespace AdminUI\AdminUIXero\Commands;
 use Illuminate\Console\Command;
 use AdminUI\AdminUI\Models\Order;
 use AdminUI\AdminUI\Traits\CliTrait;
-use Facades\AdminUI\AdminUIXero\Controllers\XeroContactClass;
-use Facades\AdminUI\AdminUIXero\Controllers\XeroInvoiceClass;
-use Facades\AdminUI\AdminUIXero\Controllers\XeroPaymentClass;
+use AdminUI\AdminUIXero\Services\XeroContactService;
+use AdminUI\AdminUIXero\Services\XeroInvoiceService;
+use AdminUI\AdminUIXero\Services\XeroPaymentService;
 
 
-class PushStripe extends Command
+class XeroPushOrders extends Command
 {
     use CliTrait;
+
+    public function __construct(
+        public XeroContactService $xeroContactService,
+        public XeroInvoiceService $xeroInvoiceService,
+        public XeroPaymentService $xeroPaymentService
+    ) {
+        parent::__construct();
+    }
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'adminui:pushtoxero';
+    protected $signature = 'adminui:xero-push-orders';
 
     /**
      * The console command description.
@@ -48,10 +56,15 @@ class PushStripe extends Command
 
         foreach ($orders as $order) {
 
-            $contact = XeroContactClass::getContact($order->account);
+            if (!$order->account) {
+                $this->cliInfo('No account for order:' . $order->id);
+                continue;
+            }
+
+            $contact = $this->xeroContactService->getContact($order->account);
 
             // now you have a contact create invoice
-            $invoice = XeroInvoiceClass::order($order, $contact);
+            $invoice = $this->xeroInvoiceService->order($order, $contact);
 
             // store the invoice information
             $order->process_id = $invoice['InvoiceID'];
@@ -63,7 +76,7 @@ class PushStripe extends Command
             // now the payment. Only process payments that have been done online.
             foreach ($order->payments as $payment) {
                 if ($payment->transaction_id != '') {
-                    $payment = XeroPaymentClass::payment($payment, $order->process_id);
+                    $payment = $this->xeroPaymentService->payment($payment, $order->process_id);
                 }
             }
             $this->cliProgress();

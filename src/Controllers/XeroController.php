@@ -136,10 +136,10 @@ class XeroController extends InertiaCoreController
     {
         // This will push the order to xero
         // Create or get new contact info
-        $contact = $this->xeroContactClass->getContact($order->account);
+        $contact = $this->xeroContactService->getContact($order->account);
 
         // now you have a contact create invoice
-        $invoice = $this->xeroInvoiceClass->order($order, $contact);
+        $invoice = $this->xeroInvoiceService->order($order, $contact);
 
         // store the invoice information
         $order->process_id = $invoice['InvoiceID'];
@@ -150,7 +150,7 @@ class XeroController extends InertiaCoreController
         // now the payment. Only process payments that have been done online.
         foreach ($order->payments as $payment) {
             if ($payment->transaction_id != '') {
-                $payment = $this->xeroPaymentClass->payment($order);
+                $payment = $this->xeroPaymentService->payment($order);
             }
         }
 
@@ -166,10 +166,10 @@ class XeroController extends InertiaCoreController
         }
 
         // find the correct contact
-        $contact = $this->xeroContactClass->getContact($order->account);
+        $contact = $this->xeroContactService->getContact($order->account);
 
         // generate an invoice
-        $invoice = $this->xeroInvoiceClass->order($order, $contact);
+        $invoice = $this->xeroInvoiceService->order($order, $contact);
 
         // store the invoice information
         $order->process_id = $invoice['InvoiceID'];
@@ -180,7 +180,7 @@ class XeroController extends InertiaCoreController
         // now the payment. Only process payments that have been done online, or have a transaction_id.
         foreach ($order->payments as $payment) {
             if ($payment->transaction_id != '') {
-                $payment = $this->xeroPaymentClass->payment($order);
+                $payment = $this->xeroPaymentService->payment($order);
             }
         }
 
