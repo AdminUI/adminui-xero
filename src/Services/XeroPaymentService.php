@@ -1,11 +1,11 @@
 <?php
 
-namespace AdminUI\AdminUIXero\Controllers;
+namespace AdminUI\AdminUIXero\Services;
 
 use AdminUI\AdminUIXero\Facades\Xero;
 use AdminUI\AdminUI\Models\Payment;
 
-class XeroPaymentClass
+class XeroPaymentService
 {
     public static function payment(Payment $payment, String $process_id = null)
     {
@@ -14,6 +14,6 @@ class XeroPaymentClass
             'Amount'    => $payment->total / 100,
             'Reference' => $payment->transaction_id
         ];
-        return Xero::payments()->apply($order->process_id, $paymentData);
+        return Xero::payments()->apply($process_id, $paymentData);
     }
 }

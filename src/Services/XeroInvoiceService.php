@@ -1,20 +1,13 @@
 <?php
 
-namespace AdminUI\AdminUIXero\Controllers;
+namespace AdminUI\AdminUIXero\Services;
 
-use Inertia\Inertia;
 use AdminUI\AdminUIXero\Facades\Xero;
-use AdminUI\AdminUI\Facades\Flash;
-use Illuminate\Support\Facades\DB;
-use AdminUI\AdminUI\Models\Account;
-use AdminUI\Xero\Models\XeroToken;
-use AdminUI\AdminUI\Models\Configuration;
-use AdminUI\AdminUI\Traits\ApiResponseTrait;
-use AdminUI\AdminUI\Controllers\AdminUI\Inertia\InertiaCoreController;
+use AdminUI\AdminUI\Models\Order;
 
-class XeroInvoiceClass
+class XeroInvoiceService
 {
-    public static function order($order, $contact)
+    public static function order(Order $order, array $contact): array
     {
         // confirm the order is not empty
         if ($order->lines->count() <= 0) {
@@ -23,7 +16,7 @@ class XeroInvoiceClass
 
         foreach ($order->lines as $item) {
             $items[] = [
-                'Description' => $item->product_name. '('.$item->sku_code.')',
+                'Description' => $item->product_name . '(' . $item->sku_code . ')',
                 'Quantity' => $item->qty,
                 'UnitAmount' => $item->item_exc_tax / 100,
                 'LineAmount' => $item->line_exc_tax / 100,
@@ -37,7 +30,7 @@ class XeroInvoiceClass
         $postage = $order->postageRate;
         if ($postage) {
             $items[] = [
-                'Description' => $order->postage_description,
+                'Description' => $order->postage_description == '' ? $postage->postageType->name : $order->postage_description,
                 'Quantity' => 1,
                 'UnitAmount' => $order->postage_exc_tax / 100,
                 'LineAmount' => $order->postage_exc_tax / 100,
@@ -54,17 +47,17 @@ class XeroInvoiceClass
         }
         if ($address) {
             $items[] = [
-                'Description' => 'Delivery Address: '.$address->addressee.', '.$address->address.', '.$address->address_2.', '.$address->town.', '.$address->county.', '.$address->postcode.'; Tel: '.$address->phone,
+                'Description' => 'Delivery Address: ' . $address->addressee . ', ' . $address->address . ', ' . $address->address_2 . ', ' . $address->town . ', ' . $address->county . ', ' . $address->postcode . '; Tel: ' . $address->phone,
             ];
         }
 
         $data = [
             'Type' => 'ACCREC',
             'Contact' => [
-                'COntactID' => $contact['ContactID'],
+                'ContactID' => $contact['ContactID'],
             ],
             'DueDate' => date('Y-m-d'),
-            'Reference' => 'MM/'.$order->id,
+            'Reference' => 'MM/' . $order->id,
             'LineAmountTypes' => 'Exclusive',
             'LineItems' => $items ?? [],
             'Status' => 'AUTHORISED',
@@ -72,7 +65,7 @@ class XeroInvoiceClass
         return Xero::invoices()->store($data);
     }
 
-    public static function clean(string $string):string
+    public static function clean(string $string): string
     {
         return strtolower(trim($string));
     }

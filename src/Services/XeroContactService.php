@@ -1,21 +1,15 @@
 <?php
 
-namespace AdminUI\AdminUIXero\Controllers;
+namespace AdminUI\AdminUIXero\Services;
 
-use Inertia\Inertia;
 use AdminUI\AdminUIXero\Facades\Xero;
-use AdminUI\AdminUI\Facades\Flash;
-use Illuminate\Support\Facades\DB;
 use AdminUI\AdminUI\Models\Account;
-use AdminUI\AdminUIXero\Models\XeroToken;
-use AdminUI\AdminUI\Models\Configuration;
-use AdminUI\AdminUI\Traits\ApiResponseTrait;
-use AdminUI\AdminUI\Controllers\AdminUI\Inertia\InertiaCoreController;
+use Str;
 
-class XeroContactClass
+class XeroContactService
 {
 
-    public static function getContact($account)
+    public static function getContact(Account $account)
     {
         // get existing account or create a new one
         $contact = self::getContactById($account->import_id);
@@ -24,6 +18,7 @@ class XeroContactClass
         }
 
         // did nt have a matching contactId so try to find using email
+
         $user = self::getUser($account);
         if ($user) {
             $contact = self::getContactByEmail($user->email);
@@ -48,7 +43,7 @@ class XeroContactClass
         return self::createContact($account, $user);
     }
 
-    public static function getUser($account)
+    public static function getUser(Account $account)
     {
         $user = $account->owners()->first();
         if (!empty($user)) {
@@ -63,7 +58,7 @@ class XeroContactClass
 
     public static function getContactById($id)
     {
-        if (in_array($id, [0,1,2,3,null])) {
+        if (in_array($id, [0, 1, 2, 3, null])) {
             return false;
         }
         return Xero::contacts()->find($id);
@@ -71,12 +66,12 @@ class XeroContactClass
 
     public static function getContactByEmail($email)
     {
-        return Xero::contacts()->get(1, 'EmailAddress="'.self::clean($email).'"');
+        return Xero::contacts()->get(1, 'EmailAddress="' . self::clean($email) . '"');
     }
 
     public static function getContactByName($name)
     {
-        return Xero::contacts()->get(1, 'Name="'.self::clean($name).'"');
+        return Xero::contacts()->get(1, 'Name="' . self::clean($name) . '"');
     }
 
     public static function createContact($account, $user)
@@ -99,16 +94,16 @@ class XeroContactClass
 
         $contact = Xero::contacts()->store([
             'Name' => $account->name,
-            'ContactNumber' => 'AUI'.$account->id,
-            'EmailAddress' => $user->email,
-            'FirstName' => $user->first_name,
-            'LastName' => $user->last_name,
+            'ContactNumber' => 'AUI' . $account->id,
+            'EmailAddress' => $user->email ?? 'noemail@' . Str::slug($account->name) . 'co.uk',
+            'FirstName' => $user->first_name ?? $account->name,
+            'LastName' => $user->last_name ?? '',
             'TaxNumber' => $account->tax_number,
             'Addresses' => $add ?? [],
             'Phones' => [
                 [
                     'PhoneType' => 'DEFAULT',
-                    'PhoneNumber' => $user->phone,
+                    'PhoneNumber' => $user->phone ?? '0',
                 ],
             ],
             'PaymentTerms' => [
@@ -116,6 +111,7 @@ class XeroContactClass
             ]
         ]);
         self::saveContact($contact, $account);
+        sleep(2);
         return $contact;
     }
 
@@ -125,7 +121,7 @@ class XeroContactClass
         $account->save();
     }
 
-    public static function clean(string $string):string
+    public static function clean(string $string): string
     {
         return strtolower(trim($string));
     }
