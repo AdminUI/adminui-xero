@@ -25,7 +25,8 @@ class XeroController extends InertiaCoreController
         public XeroContactService $xeroContactService,
         public XeroInvoiceService $xeroInvoiceService,
         public XeroPaymentService $xeroPaymentService
-    ){}
+    ) {
+    }
 
     public function index()
     {
@@ -80,7 +81,7 @@ class XeroController extends InertiaCoreController
         //             }
         //         }
         //     }
-        }
+        // }
         return $synced;
     }
 
