@@ -2,13 +2,13 @@
 
 namespace AdminUI\AdminUIXero\Providers;
 
+use AdminUI\AdminUIXero\Xero;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use AdminUI\AdminUIXero\XeroAuthenticated;
-use AdminUI\AdminUIXero\Xero;
-use AdminUI\AdminUIXero\Commands\XeroKeepAliveCommand;
+use AdminUI\AdminUIXero\Commands\XeroPushOrders;
 use AdminUI\AdminUIXero\Commands\XeroShowAllCommand;
-
+use AdminUI\AdminUIXero\Commands\XeroKeepAliveCommand;
 
 class XeroServiceProvider extends ServiceProvider
 {
