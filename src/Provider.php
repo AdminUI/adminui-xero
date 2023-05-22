@@ -59,7 +59,7 @@ class Provider extends ServiceProvider
 
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            $schedule->command('xero:keep-alive')->everyMinute();
+            $schedule->command('adminui:xero-keep-alive')->everyMinute();
         });
     }
 
