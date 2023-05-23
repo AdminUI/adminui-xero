@@ -51,12 +51,14 @@ class XeroInvoiceService
             ];
         }
 
+        $due = \Carbon\Carbon::now()->subDays($order->account->payment_terms ?? 0)->format('Y-m-d');
+
         $data = [
             'Type' => 'ACCREC',
             'Contact' => [
                 'ContactID' => $contact['ContactID'],
             ],
-            'DueDate' => date('Y-m-d'),
+            'DueDate' => $due,
             'Reference' => 'MM/' . $order->id,
             'LineAmountTypes' => 'Exclusive',
             'LineItems' => $items ?? [],
