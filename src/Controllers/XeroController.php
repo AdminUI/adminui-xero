@@ -150,7 +150,7 @@ class XeroController extends InertiaCoreController
         // now the payment. Only process payments that have been done online.
         foreach ($order->payments as $payment) {
             if ($payment->transaction_id != '') {
-                $payment = $this->xeroPaymentService->payment($order);
+                $payment = $this->xeroPaymentService->payment($payment);
             }
         }
 
