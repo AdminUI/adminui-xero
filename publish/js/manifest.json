@@ -3,12 +3,12 @@
     "dynamicImports": [
       "resources/pages/Setup.vue"
     ],
-    "file": "assets/index-d05a4ed3.js",
+    "file": "assets/index-64ef8b4a.js",
     "isEntry": true,
     "src": "resources/index.js"
   },
   "resources/pages/Setup.vue": {
-    "file": "assets/Setup-a1dfaf71.js",
+    "file": "assets/Setup-ecfdb1c2.js",
     "isDynamicEntry": true,
     "src": "resources/pages/Setup.vue"
   }

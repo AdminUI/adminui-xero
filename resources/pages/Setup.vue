@@ -12,7 +12,7 @@
 					/>
 					<AuiInputText
 						v-model="form.xero_account_id"
-						:label="accountId.label"
+						:label="accountId?.label"
 						:error="formErrors.xero_account_id"
 					/>
 					<v-alert type="info">
@@ -57,27 +57,6 @@
 						<div>Not currently connected</div>
 						<div class="mt-8">
 							<v-btn color="primary" @click="connect">Connect Xero</v-btn>
-						</div>
-					</div>
-				</AuiCard>
-				<AuiCard title="Contacts" class="mt-4">
-					<v-simple-table v-if="props.xeroContacts">
-						<tbody>
-							<tr>
-								<td>Contacts</td>
-								<td class="caption">{{ props.xeroContacts.length }}</td>
-							</tr>
-						</tbody>
-					</v-simple-table>
-					<div class="mt-8 d-flex justify-space-between">
-						<div>
-							<small>
-								This will sync your current accounts on Xero to your accounts on AdminUI<br />
-								If this is not done new accounts may not sync when assigning orders to them.<br />
-							</small>
-						</div>
-						<div>
-							<v-btn color="error" @click="sync">Sync Contacts</v-btn>
 						</div>
 					</div>
 				</AuiCard>

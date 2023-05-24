@@ -57,5 +57,7 @@ class SendOrderToXero implements ShouldQueue
                 $payment = $this->xeroPaymentService->payment($payment, $event->order->process_id);
             }
         }
+
+        info($event->order->id . ' was succesfully pushed to Xero with Xero invoice of ' . $invoice['InvoiceNumber']);
     }
 }
