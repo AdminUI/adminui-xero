@@ -47,116 +47,10 @@ class XeroController extends InertiaCoreController
     public function sync()
     {
         set_time_limit(0);
-        // $synced = $this->allocateAccounts();
-        $synced = $this->allocateCompanies();
         Flash::success($synced . ' accounts were synced with quickbooks');
         return back();
     }
 
-    public static function allocateAccounts()
-    {
-        die;
-        // $accounts = Account::whereNull('import_id')->with('owners')->orderBy('id', 'desc')->get();
-        // $syncing = $accounts->count();
-        // $synced = 0;
-        // if ($accounts->count() > 0) {
-        //     foreach ($accounts as $account) {
-        //         $user = $account->owners->first();
-        //         if ($user) {
-        //             // check if on xero
-        //             $where = 'EmailAddress="' . $user->email . '"';
-        //             $contacts = Xero::contacts()->get(1, $where);
-        //             // // if not on xero
-        //             if ($contacts) {
-        //                 foreach ($contacts as $contact) {
-        //                     if (trim($account->name) == trim($contact['Name'])) {
-        //                         $account->import_id = $contact['ContactID'];
-        //                         $account->save();
-        //                         $synced++;
-        //                     }
-        //                 }
-        //             } else {
-        //                 $account->import_id = 0;
-        //                 $account->save();
-        //             }
-        //         }
-        //     }
-        // }
-        return $synced;
-    }
-
-    public static function allocateCompanies()
-    {
-        $accounts = Account::whereNull('import_id')->with('owners')->orderBy('id', 'desc')->paginate('30');
-        $syncing = $accounts->count();
-        $synced = 0;
-        if ($accounts->count() > 0) {
-            foreach ($accounts as $account) {
-                self::checkAccount($account);
-            }
-        }
-        return $synced;
-    }
-
-    public function checkAccount($account)
-    {
-        if ($account->name != '') {
-            // check if on xero
-            $where = 'Name="' . trim($account->name) . '"';
-            $contacts = Xero::contacts()->get(1, $where);
-            if ($contacts) {
-                $user = $account->owners()->first();
-                if (empty($user)) {
-                    $user = $account->users()->first();
-                }
-                if ($user) {
-                    foreach ($contacts as $contact) {
-                        if (self::clean($user->email)  == self::clean($contact['EmailAddress'])) {
-                            $account->import_id = $contact['ContactID'];
-                            $account->save();
-                            $synced++;
-                            break;
-                        } else {
-                            $account->import_id = 1;
-                            $account->save();
-                        }
-                    }
-                } else {
-                    $account->import_id = 0;
-                    $account->save();
-                }
-            } else {
-                $account->import_id = 2;
-                $account->save();
-            }
-        }
-    }
-
-    public function pushOrderToXero($order)
-    {
-        // This will push the order to xero
-        // Create or get new contact info
-        $contact = $this->xeroContactService->getContact($order->account);
-
-        // now you have a contact create invoice
-        $invoice = $this->xeroInvoiceService->order($order, $contact);
-
-        // store the invoice information
-        $order->process_id = $invoice['InvoiceID'];
-        $order->processed_at = \Carbon\Carbon::now();
-        $order->admin_notes = $order->admin_note . '<br/> Xero Invoice Number: ' . $invoice['InvoiceNumber'];
-        $order->save();
-
-        // now the payment. Only process payments that have been done online.
-        foreach ($order->payments as $payment) {
-            if ($payment->transaction_id != '') {
-                $payment = $this->xeroPaymentService->payment($payment);
-            }
-        }
-
-        return true;
-        // All done hopefully
-    }
 
     public function manual($id)
     {
@@ -165,7 +59,12 @@ class XeroController extends InertiaCoreController
             die('order processed already');
         }
 
-        // find the correct contact
+        // This will push the order to xero
+        // Create or get new contact info
+        if (!$order->account) {
+            return false;
+        }
+
         $contact = $this->xeroContactService->getContact($order->account);
 
         // generate an invoice
@@ -174,13 +73,14 @@ class XeroController extends InertiaCoreController
         // store the invoice information
         $order->process_id = $invoice['InvoiceID'];
         $order->processed_at = \Carbon\Carbon::now();
-        $order->admin_notes = $order->admin_note . '<br/> Xero Invoice Number: ' . $invoice['InvoiceNumber'];
+        $order->admin_notes = ($order->admin_notes != '' ? $order->admin_notes . '<br/>' : $order->admin_notes) . 'Xero Invoice Number: ' . $invoice['InvoiceNumber'];
         $order->save();
 
         // now the payment. Only process payments that have been done online, or have a transaction_id.
+        // now the payment. Only process payments that have been done online.
         foreach ($order->payments as $payment) {
             if ($payment->transaction_id != '') {
-                $payment = $this->xeroPaymentService->payment($order);
+                $payment = $this->xeroPaymentService->payment($payment, $order->process_id);
             }
         }
 

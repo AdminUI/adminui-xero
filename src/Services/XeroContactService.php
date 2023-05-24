@@ -26,7 +26,7 @@ class XeroContactService
         if ($contact) {
             if (count($contact) == 1) {
                 self::saveContact($contact[0], $account);
-                return $contact;
+                return $contact[0];
             }
         }
 
@@ -35,7 +35,7 @@ class XeroContactService
         if ($contact) {
             if (count($contact) == 1) {
                 self::saveContact($contact[0], $account);
-                return $contact;
+                return $contact[0];
             }
         }
 
