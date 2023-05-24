@@ -2,7 +2,7 @@
 
 namespace AdminUI\AdminUIXero\Listeners;
 
-use AdminUI\AdminUI\Events\NewOrder;
+use AdminUI\AdminUI\Events\Public\NewOrder;
 use AdminUI\AdminUIXero\Services\XeroContactService;
 use AdminUI\AdminUIXero\Services\XeroInvoiceService;
 use AdminUI\AdminUIXero\Services\XeroPaymentService;
