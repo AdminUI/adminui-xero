@@ -35,8 +35,11 @@ class Provider extends ServiceProvider
 
         $this->publishes([
             $baseDir . '/publish/config' => config_path(),
+        ], 'adminui-config');
+
+        $this->publishes([
             $baseDir . '/publish/js' => public_path('vendor/adminui-xero')
-        ], 'auixero');
+        ], 'adminui-public');
     }
 
     public function boot()
