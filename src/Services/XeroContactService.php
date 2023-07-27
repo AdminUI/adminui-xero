@@ -13,12 +13,21 @@ class XeroContactService
     {
         // get existing account or create a new one
         $contact = self::getContactById($account->import_id);
+
+        // ensure the contact account is not archived
+        if ($contact && $contact['ContactStatus'] == 'ARCHIVED') {
+            // $this->cliInfo("Contact has been archived on Xero. Regenerating the contact");
+            $account->import_id = null;
+            $account->save();
+            unset($contact);
+        }
+
+        // if a valid contact return it
         if ($contact) {
             return $contact;
         }
 
         // did nt have a matching contactId so try to find using email
-
         $user = self::getUser($account);
         if ($user) {
             $contact = self::getContactByEmail($user->email);
