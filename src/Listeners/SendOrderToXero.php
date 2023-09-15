@@ -2,14 +2,27 @@
 
 namespace AdminUI\AdminUIXero\Listeners;
 
+use Throwable;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Queue\InteractsWithQueue;
 use AdminUI\AdminUI\Events\Public\NewOrder;
+use AdminUI\AdminUI\Mail\GenericEmail;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use AdminUI\AdminUIXero\Services\XeroContactService;
 use AdminUI\AdminUIXero\Services\XeroInvoiceService;
 use AdminUI\AdminUIXero\Services\XeroPaymentService;
-use Illuminate\Contracts\Queue\ShouldQueue;
 
 class SendOrderToXero implements ShouldQueue
 {
+    use InteractsWithQueue;
+
+    /**
+     * The number of times the queued listener may be attempted.
+     *
+     * @var int
+     */
+    public $tries = 5;
+
     /**
      * Create the event listener.
      */
@@ -59,5 +72,17 @@ class SendOrderToXero implements ShouldQueue
         }
 
         info($event->order->id . ' was succesfully pushed to Xero with Xero invoice of ' . $invoice['InvoiceNumber']);
+    }
+
+    /**
+     * Handle a job failure.
+     */
+    public function failed(NewOrder $event, Throwable $exception): void
+    {
+        Mail::to('k.turner@evomark.co.uk')
+            ->send(new GenericEmail(
+                config('app.name') . ': Order failed to push to Xero',
+                json_encode($event, JSON_PRETTY_PRINT)
+            ));
     }
 }
